@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.Geocoder;
@@ -31,11 +32,13 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
@@ -47,8 +50,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     Location mLastLocation;
     Marker mCurrLocationMarker;
     LocationRequest mLocationRequest;
-    List<Marker> points;
-    List<Intent> pics;
+    List<Marker> points = new ArrayList<>();
+    List<Bitmap> pics = new ArrayList<>();
     private GoogleMap mMap;
     private FloatingActionButton fab;
     static final int PICK_IMAGE = 1;
@@ -86,12 +89,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == PICK_IMAGE){
-            if(resultCode == RESULT_OK){
-                Log.v("JAVA", "GOT A RESULT");
-                pics.add(data);
-                LatLng temp = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-                points.add(mMap.addMarker(new MarkerOptions().position(temp)));
+
+        if(requestCode != RESULT_CANCELED) {
+            if (requestCode == PICK_IMAGE) {
+                if (resultCode == RESULT_OK) {
+                    Log.v("JAVA", "GOT A RESULT");
+                    Bitmap picHold = (Bitmap) data.getExtras().get("data");
+                    pics.add(picHold);
+                    LatLng temp = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+                    Log.v("JAVA",""+temp.latitude);
+                    Log.v("JAVA", ""+temp.longitude);
+                    String tempS = pics.size() + "";
+                    mMap.addMarker(new MarkerOptions().title(tempS)
+                            .position(temp)
+                            .icon(BitmapDescriptorFactory.fromBitmap(picHold)));
+                }
             }
         }
     }
@@ -160,7 +172,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mCurrLocationMarker.remove();
         }
 //Showing Current Location Marker on Map
-       // LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         //MarkerOptions markerOptions = new MarkerOptions();
         //markerOptions.position(latLng);
         LocationManager locationManager = (LocationManager)
@@ -267,55 +279,3 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 }
-/*import android.support.v4.app.FragmentActivity;
-import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
-
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
-
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
-
-    private GoogleMap mMap;
-    private FusedLocationProviderClient fusedLocationClient;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        mapFragment.getMapAsync(this);
-    }
-
-
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
-/*
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-
-        // Add a marker in Sydney and move the camera
-        if(ContextCompat.checkSelfPermission)
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-    }
-}
-*/
