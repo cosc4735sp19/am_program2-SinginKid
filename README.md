@@ -1,7 +1,7 @@
-# Program # X
-Name:  
+# Program # 2
+Name:  Joshua Bartling
 Cosc 4735
 
-Description:  (how to run the program, phone/emulator screen size, android version ie 7.0)
+Description:  Using version Android version 8. Plug and play
 
-Anything that doesn't work:
+Anything that doesn't work: Displays image on all markers
