@@ -25,6 +25,7 @@ import android.view.View;
 import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -37,6 +38,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +50,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LocationListener {
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
     GoogleApiClient mGoogleApiClient;
+    private FusedLocationProviderClient fusedLocationClient;
     Location mLastLocation;
     Marker mCurrLocationMarker;
     LocationRequest mLocationRequest;
@@ -65,6 +69,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         fab = findViewById(R.id.imageButton);
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkLocationPermission();
@@ -94,6 +99,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if (requestCode == PICK_IMAGE) {
                 if (resultCode == RESULT_OK) {
                     Log.v("JAVA", "GOT A RESULT");
+                    fusedLocationClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location location) {
+                            if(location != null) {
+                                mLastLocation = location;
+                            }
+                        }
+                    });
                     Bitmap picHold = (Bitmap) data.getExtras().get("data");
                     pics.add(picHold);
                     LatLng temp = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
